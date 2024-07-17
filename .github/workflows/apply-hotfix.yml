@@ -1,0 +1,44 @@
+name: Apply Hotfix
+
+on:
+  push:
+    branches:
+      - hotfix/*
+
+jobs:
+  apply-hotfix:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Git
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+
+      - name: Get Branch Name
+        id: vars
+        run: echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/})"
+
+      - name: Fetch All Branches
+        run: git fetch --all
+
+      - name: Merge Hotfix to Release/v1
+        run: |
+          git checkout release/v1.0
+          git merge ${{ steps.vars.outputs.branch }} --no-ff -m "Merge hotfix ${{ steps.vars.outputs.branch }} into release/v1.0"
+          git push origin release/v1.0
+
+      - name: Merge Hotfix to Release/v2
+        run: |
+          git checkout release/v2.0
+          git merge ${{ steps.vars.outputs.branch }} --no-ff -m "Merge hotfix ${{ steps.vars.outputs.branch }} into release/v2.0"
+          git push origin release/v2.0
+
+      - name: Merge Hotfix to Release/v3
+        run: |
+          git checkout release/v3.0
+          git merge ${{ steps.vars.outputs.branch }} --no-ff -m "Merge hotfix ${{ steps.vars.outputs.branch }} into release/v3.0"
+          git push origin release/v3.0
